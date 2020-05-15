@@ -42,21 +42,8 @@ void ra() {
 void singleton() {
     if((rand()&31) == 0) {
         printf("read()");
-    } else 
-    if(rand()&3) {
-        ra();
     } else {
-        if(no == 0 || rand()&15) {
-            printf("%d", rand()&15);
-        } else {
-            printf("f%d(", rand()%no);
-            expr();
-            printf(", ");
-            expr();
-            printf(", ");
-            printf("a%d%d", no, 5 + (rand()&1));
-            printf(")");
-        }
+        ra();
     }
 }
 void parent_expr() {
@@ -97,6 +84,11 @@ void expr() {
             raw_expr();
             printf(")");
             break;
+        case 2:
+            printf("!(");
+            raw_expr();
+            printf(")");
+            break;
         default:
             raw_expr();
             break;
@@ -125,7 +117,7 @@ void stmt_if() {
         indent += 4;
         stmt(2);
         indent -= 4;
-        output("    }");
+        output("}");
     }
     printf("\n");
 }
@@ -158,6 +150,18 @@ void stmt() {
         case 2:
                 stmt_while();
                 return;
+        case 3:
+                if(no == 0 || rand()&15) {
+                    printf("%d", rand()&15);
+                } else {
+                    printf("f%d(", rand()%no);
+                    expr();
+                    printf(", ");
+                    expr();
+                    printf(", ");
+                    printf("a%d%d", no, 5 + (rand()&1));
+                    printf(")");
+                }
         case 14:
                 if((rand()&3) == 0) {
                     stmt_return();
@@ -216,7 +220,6 @@ int main() {
     for(no = 0; no < 5; ++no) {
         gen_func();
     }
-    no = 6;
     gen_main();
     return 0;
 }

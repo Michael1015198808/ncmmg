@@ -6,7 +6,7 @@ PARSER=~/Lab/parser
 IRSIM=~/compilers-tests/irsim/build/irsim
 while [ $tot -lt 100000 ]; do
     ./generator > workdir/tmp.c
-    if gcc workdir/gcc.c -o workdir/a.out 2>/dev/null; then
+    if gcc -fwrapv workdir/gcc.c -o workdir/a.out 2>/dev/null; then
         if timeout 2 ./workdir/a.out < 0s.txt > workdir/gcc_out; then
             $PARSER workdir/tmp.c workdir/a.ir;
             $IRSIM workdir/a.ir < 0s.txt > workdir/cmm_out 2>/dev/null;
