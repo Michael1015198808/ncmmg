@@ -9,14 +9,14 @@ void stmt();
 void stmts(int);
 
 static void builtin_funcs() {
-    printf("int neg(int i) {\n");
-    printf("    return -(i);\n");
+    printf("int neg(int neg_i) {\n");
+    printf("    return -(neg_i);\n");
     printf("}\n");
-    printf("int abs(int i) {\n");
-    printf("    if(i > 0) {\n");
-    printf("        return i;\n");
+    printf("int abs(int abs_i) {\n");
+    printf("    if(abs_i > 0) {\n");
+    printf("        return abs_i;\n");
     printf("    }\n");
-    printf("    return neg(i);\n");
+    printf("    return neg(abs_i);\n");
     printf("}\n");
 }
 
@@ -213,7 +213,7 @@ void gen_main() {
 int main() {
     srand(time(NULL));
     builtin_funcs();
-    for(no = 0; no < 5; ++no) {
+    for(no = 0; no <= 5; ++no) {
         gen_func();
     }
     no = 6;
