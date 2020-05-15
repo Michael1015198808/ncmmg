@@ -2,21 +2,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <assert.h>
 
 int no = 0, indent = 0;
 void expr();
 void stmt();
 void stmts(int);
 
+unsigned int randuint(){
+  static FILE *f = NULL;
+  if(!f){
+    f = fopen("/dev/urandom", "r");
+    assert(f);
+  }
+  unsigned int ret;
+  fread(&ret, sizeof(unsigned int), 1, f);
+  return ret;
+}
+
 static void builtin_funcs() {
-    printf("int neg(int i) {\n");
-    printf("    return -(i);\n");
+    printf("int neg(int neg_i) {\n");
+    printf("    return -(neg_i);\n");
     printf("}\n");
-    printf("int abs(int i) {\n");
-    printf("    if(i > 0) {\n");
-    printf("        return i;\n");
+    printf("int abs(int abs_i) {\n");
+    printf("    if(abs_i > 0) {\n");
+    printf("        return abs_i;\n");
     printf("    }\n");
-    printf("    return neg(i);\n");
+    printf("    return neg(abs_i);\n");
     printf("}\n");
 }
 
@@ -36,25 +48,25 @@ int output(const char* fmt, ...) {
 }
 
 void ra() {
-    a(1 + (rand()&7));
+    a(1 + (randuint()&7));
 }
 
 void singleton() {
-    if((rand()&31) == 0) {
+    if((randuint()&31) == 0) {
         printf("read()");
     } else 
-    if(rand()&3) {
+    if(randuint()&3) {
         ra();
     } else {
-        if(no == 0 || rand()&15) {
-            printf("%d", rand()&15);
+        if(no == 0 || randuint()&15) {
+            printf("%d", randuint()&15);
         } else {
-            printf("f%d(", rand()%no);
+            printf("f%d(", randuint()%no);
             expr();
             printf(", ");
             expr();
             printf(", ");
-            printf("a%d%d", no, 5 + (rand()&1));
+            printf("a%d%d", no, 5 + (randuint()&1));
             printf(")");
         }
     }
@@ -65,8 +77,8 @@ void parent_expr() {
     printf(")");
 }
 void raw_expr() {
-    if((rand()&7) == 0) {
-        if(rand()&7) {
+    if((randuint()&7) == 0) {
+        if(randuint()&7) {
             expr();
         } else {
             parent_expr();
@@ -74,9 +86,9 @@ void raw_expr() {
     } else {
         singleton();
     }
-    printf("%c", "+-*"[rand()%3]);
-    if((rand()&7) == 0) {
-        if(rand()&7) {
+    printf("%c", "+-*"[randuint()%3]);
+    if((randuint()&7) == 0) {
+        if(randuint()&7) {
             expr();
         } else {
             parent_expr();
@@ -86,7 +98,7 @@ void raw_expr() {
     }
 }
 void expr() {
-    switch(rand()&31) {
+    switch(randuint()&31) {
         case 0:
             printf("abs(");
             raw_expr();
@@ -103,16 +115,17 @@ void expr() {
     }
 }
 void stmt_return() {
-    output("return "); expr(); printf(";\n");
+    //output("return "); expr(); printf(";\n");
+    output("return 0;\n");
 }
 void stmt_if() {
     output("if(");
     parent_expr();
-    if((rand()&3) == 0) {
+    if((randuint()&3) == 0) {
         static const char* relops[] = {
             "<=", ">=", "==", "!=", ">", "<"
         };
-        printf(" %s ", relops[rand()%6]);
+        printf(" %s ", relops[randuint()%6]);
         parent_expr();
     }
     printf(") {\n");
@@ -120,7 +133,7 @@ void stmt_if() {
     stmts(2);
     indent -=4;
     output("}");
-    if(rand()&1) {
+    if(randuint()&1) {
         printf(" else {\n");
         indent += 4;
         stmt(2);
@@ -133,7 +146,7 @@ void stmt_while() {
     static int dep = 0;
     if(dep < 4) {
         output("i%d[%d] = 0;\n", no, dep);
-        output("while(i%d[%d] < %d) {\n", no, dep, 1 + (rand()&3));
+        output("while(i%d[%d] < %d) {\n", no, dep, 1 + (randuint()&3));
         indent += 4;
         output("i%d[%d] = i%d[%d] + 1;\n", no, dep, no, dep);
         ++dep;
@@ -146,7 +159,7 @@ void stmt_while() {
     }
 }
 void stmt() {
-    switch(rand()&15) {
+    switch(randuint()&15) {
         case 0:
             stmt_if();
             return;
@@ -159,7 +172,7 @@ void stmt() {
                 stmt_while();
                 return;
         case 14:
-                if((rand()&3) == 0) {
+                if((randuint()&3) == 0) {
                     stmt_return();
                     return;
                 }
@@ -173,15 +186,15 @@ void stmt() {
     }
 }
 void stmts(int n) {
-    for(int i = 0; i < n || ((rand() & 1) && i < 2 * n); ++i) {
+    for(int i = 0; i < n || ((randuint() & 1) && i < 2 * n); ++i) {
         stmt();
     }
 }
 void gen_func() {
     output("int f%d(int a%d1, int a%d2, int a%d6[2]) {\n", no, no, no, no);
     indent += 4;
-    output("int a%d3 = %d;\n", no, rand()&15);
-    output("int a%d4 = %d;\n", no, rand()&15);
+    output("int a%d3 = %d;\n", no, randuint()&15);
+    output("int a%d4 = %d;\n", no, randuint()&15);
     output("int a%d5[2];\n", no);
     output("int i%d[4];\n", no);
     output("a%d5[0] = 17173;\n", no);
@@ -194,10 +207,10 @@ void gen_func() {
 void gen_main() {
     output("int main() {\n");
     indent += 4;
-    output("int a%d1 = %d;\n", no, rand()&15);
-    output("int a%d2 = %d;\n", no, rand()&15);
-    output("int a%d3 = %d;\n", no, rand()&15);
-    output("int a%d4 = %d;\n", no, rand()&15);
+    output("int a%d1 = %d;\n", no, randuint()&15);
+    output("int a%d2 = %d;\n", no, randuint()&15);
+    output("int a%d3 = %d;\n", no, randuint()&15);
+    output("int a%d4 = %d;\n", no, randuint()&15);
     output("int a%d5[2];\n", no);
     output("int a%d6[2];\n", no);
     output("int i%d[4];\n", no);
@@ -211,9 +224,8 @@ void gen_main() {
     output("}\n");
 }
 int main() {
-    srand(time(NULL));
     builtin_funcs();
-    for(no = 0; no < 5; ++no) {
+    for(no = 0; no <= 5; ++no) {
         gen_func();
     }
     no = 6;
