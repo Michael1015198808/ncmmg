@@ -87,24 +87,29 @@ void stmt_if() {
     printf("\n");
 }
 void stmt_while() {
-    printf("    i%d = 0;\n", no);
-    printf("    while(i%d < %d) {\n", no, 1 + (rand()&3));
-    printf("    i%d = i%d + 1;\n", no, no);
-    stmts(2);
-    printf("    }\n");
+    static int dep = 0;
+    if(dep < 4) {
+        printf("    i%d[%d] = 0;\n", no, dep);
+        printf("    while(i%d[%d] < %d) {\n", no, dep, 1 + (rand()&3));
+        printf("    i%d[%d] = i%d[%d] + 1;\n", no, dep, no, dep);
+        ++dep;
+        stmts(2);
+        --dep;
+        printf("    }\n");
+    } else {
+        stmt();
+    }
 }
 void stmt() {
     switch(rand()&15) {
-        case 0: {
-                    stmt_if();
-                    return;
-                }
-        case 1: {
-                    printf("    write(");
-                    expr();
-                    printf(");\n");
-                    return;
-                }
+        case 0:
+            stmt_if();
+            return;
+        case 1:
+            printf("    write(");
+            expr();
+            printf(");\n");
+            return;
         case 2:
                 stmt_while();
                 return;
@@ -132,7 +137,7 @@ void gen_func() {
     printf("    int a%d3 = %d;\n", no, rand()&15);
     printf("    int a%d4 = %d;\n", no, rand()&15);
     printf("    int a%d5[2];\n", no);
-    printf("    int i%d;\n", no);
+    printf("    int i%d[4];\n", no);
     printf("    a%d5[0] = 17173;\n", no);
     printf("    a%d5[1] = 4399;\n", no);
     stmts(5);
@@ -147,7 +152,7 @@ void gen_main() {
     printf("    int a%d3 = %d;\n", no, rand()&15);
     printf("    int a%d4 = %d;\n", no, rand()&15);
     printf("    int a%d5[2];\n", no);
-    printf("    int i%d;\n", no);
+    printf("    int i%d[4];\n", no);
     printf("    a%d5[0] = 10151;\n", no);
     printf("    a%d5[1] = 98808;\n", no);
     stmts(5);
