@@ -1,4 +1,4 @@
-A naive cmm code generator (with an automatically testing fool.)
+A naive cmm code generator (with an automatically testing tool.)
 
 ### Usage
 To compile the code generator, type
