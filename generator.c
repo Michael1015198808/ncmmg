@@ -115,7 +115,8 @@ void expr() {
     }
 }
 void stmt_return() {
-    output("return "); expr(); printf(";\n");
+    //output("return "); expr(); printf(";\n");
+    output("return 0;\n");
 }
 void stmt_if() {
     output("if(");
