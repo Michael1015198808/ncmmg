@@ -8,6 +8,18 @@ void expr();
 void stmt();
 void stmts(int);
 
+static void builtin_funcs() {
+    printf("int neg(int i) {\n");
+    printf("    return -(i);\n");
+    printf("}\n");
+    printf("int abs(int i) {\n");
+    printf("    if(i > 0) {\n");
+    printf("        return i;\n");
+    printf("    }\n");
+    printf("    return neg(i);\n");
+    printf("}\n");
+}
+
 void a(int i) {
     if(i > 6) {
         printf("a%d6[%d]", no, i - 7);
@@ -20,7 +32,7 @@ void a(int i) {
 int output(const char* fmt, ...) {
     va_list va;
     va_start(va, fmt);
-    return printf("%*c", indent, ' ') + vprintf(fmt, va);
+    return printf("%*s", indent, "") + vprintf(fmt, va);
 }
 
 void ra() {
@@ -52,7 +64,7 @@ void parent_expr() {
     expr();
     printf(")");
 }
-void expr() {
+void raw_expr() {
     if((rand()&7) == 0) {
         if(rand()&7) {
             expr();
@@ -71,6 +83,23 @@ void expr() {
         }
     } else {
         singleton();
+    }
+}
+void expr() {
+    switch(rand()&31) {
+        case 0:
+            printf("abs(");
+            raw_expr();
+            printf(")");
+            break;
+        case 1:
+            printf("neg(");
+            raw_expr();
+            printf(")");
+            break;
+        default:
+            raw_expr();
+            break;
     }
 }
 void stmt_return() {
@@ -183,6 +212,7 @@ void gen_main() {
 }
 int main() {
     srand(time(NULL));
+    builtin_funcs();
     for(no = 0; no < 5; ++no) {
         gen_func();
     }
