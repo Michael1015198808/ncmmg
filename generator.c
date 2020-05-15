@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <assert.h>
 
-int no = 0, indent = 0;
+int no = 0, indent = 0, is_main = 0;
 void expr();
 void stmt();
 void stmts(int);
@@ -107,8 +107,11 @@ void expr() {
     }
 }
 void stmt_return() {
-    //output("return "); expr(); printf(";\n");
-    output("return 0;\n");
+    if(is_main) {
+        output("return 0;\n");
+    } else {
+        output("return "); expr(); printf(";\n");
+    }
 }
 void stmt_if() {
     output("if(");
@@ -209,6 +212,7 @@ void gen_func() {
     output("}\n");
 }
 void gen_main() {
+    is_main = 1;
     output("int main() {\n");
     indent += 4;
     output("int a%d1 = %d;\n", no, randuint()&15);
