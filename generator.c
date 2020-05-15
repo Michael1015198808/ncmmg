@@ -1,22 +1,30 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
-int no;
+int no = 0, indent = 0;
 void expr();
 void stmt();
 void stmts(int);
 
 void a(int i) {
-    if(i > 4) {
+    if(i > 6) {
+        printf("a%d6[%d]", no, i - 7);
+    } else if(i > 4) {
         printf("a%d5[%d]", no, i - 5);
     } else {
         printf("a%d%d", no, i);
     }
 }
+int output(const char* fmt, ...) {
+    va_list va;
+    va_start(va, fmt);
+    return printf("%*c", indent, ' ') + vprintf(fmt, va);
+}
 
 void ra() {
-    a(1 + (rand()%6));
+    a(1 + (rand()&7));
 }
 
 void singleton() {
@@ -31,8 +39,10 @@ void singleton() {
         } else {
             printf("f%d(", rand()%no);
             expr();
-            printf(",");
+            printf(", ");
             expr();
+            printf(", ");
+            printf("a%d%d", no, 5 + (rand()&1));
             printf(")");
         }
     }
@@ -64,10 +74,10 @@ void expr() {
     }
 }
 void stmt_return() {
-    printf("    return "); expr(); printf(";\n");
+    output("return "); expr(); printf(";\n");
 }
 void stmt_if() {
-    printf("    if(");
+    output("if(");
     parent_expr();
     if((rand()&3) == 0) {
         static const char* relops[] = {
@@ -77,25 +87,31 @@ void stmt_if() {
         parent_expr();
     }
     printf(") {\n");
+    indent += 4;
     stmts(2);
-    printf("    }");
+    indent -=4;
+    output("}");
     if(rand()&1) {
         printf(" else {\n");
+        indent += 4;
         stmt(2);
-        printf("    }");
+        indent -= 4;
+        output("    }");
     }
     printf("\n");
 }
 void stmt_while() {
     static int dep = 0;
     if(dep < 4) {
-        printf("    i%d[%d] = 0;\n", no, dep);
-        printf("    while(i%d[%d] < %d) {\n", no, dep, 1 + (rand()&3));
-        printf("    i%d[%d] = i%d[%d] + 1;\n", no, dep, no, dep);
+        output("i%d[%d] = 0;\n", no, dep);
+        output("while(i%d[%d] < %d) {\n", no, dep, 1 + (rand()&3));
+        indent += 4;
+        output("i%d[%d] = i%d[%d] + 1;\n", no, dep, no, dep);
         ++dep;
         stmts(2);
         --dep;
-        printf("    }\n");
+        indent -= 4;
+        output("}\n");
     } else {
         stmt();
     }
@@ -106,7 +122,7 @@ void stmt() {
             stmt_if();
             return;
         case 1:
-            printf("    write(");
+            output("write(");
             expr();
             printf(");\n");
             return;
@@ -120,7 +136,7 @@ void stmt() {
                 }
                 //fall
         default:
-                printf("    ");
+                output("");
                 ra();
                 printf(" = ");
                 expr();
@@ -133,31 +149,37 @@ void stmts(int n) {
     }
 }
 void gen_func() {
-    printf("int f%d(int a%d1, int a%d2) {\n", no, no, no);
-    printf("    int a%d3 = %d;\n", no, rand()&15);
-    printf("    int a%d4 = %d;\n", no, rand()&15);
-    printf("    int a%d5[2];\n", no);
-    printf("    int i%d[4];\n", no);
-    printf("    a%d5[0] = 17173;\n", no);
-    printf("    a%d5[1] = 4399;\n", no);
+    output("int f%d(int a%d1, int a%d2, int a%d6[2]) {\n", no, no, no, no);
+    indent += 4;
+    output("int a%d3 = %d;\n", no, rand()&15);
+    output("int a%d4 = %d;\n", no, rand()&15);
+    output("int a%d5[2];\n", no);
+    output("int i%d[4];\n", no);
+    output("a%d5[0] = 17173;\n", no);
+    output("a%d5[1] = 4399;\n", no);
     stmts(5);
-    printf("    return "); expr(); printf(";\n");
     stmt_return();
-    printf("}\n");
+    indent -= 4;
+    output("}\n");
 }
 void gen_main() {
-    printf("int main() {\n");
-    printf("    int a%d1 = %d;\n", no, rand()&15);
-    printf("    int a%d2 = %d;\n", no, rand()&15);
-    printf("    int a%d3 = %d;\n", no, rand()&15);
-    printf("    int a%d4 = %d;\n", no, rand()&15);
-    printf("    int a%d5[2];\n", no);
-    printf("    int i%d[4];\n", no);
-    printf("    a%d5[0] = 10151;\n", no);
-    printf("    a%d5[1] = 98808;\n", no);
+    output("int main() {\n");
+    indent += 4;
+    output("int a%d1 = %d;\n", no, rand()&15);
+    output("int a%d2 = %d;\n", no, rand()&15);
+    output("int a%d3 = %d;\n", no, rand()&15);
+    output("int a%d4 = %d;\n", no, rand()&15);
+    output("int a%d5[2];\n", no);
+    output("int a%d6[2];\n", no);
+    output("int i%d[4];\n", no);
+    output("a%d5[0] = 10151;\n", no);
+    output("a%d5[1] = 98808;\n", no);
+    output("a%d6[0] = 114;\n", no);
+    output("a%d6[1] = 514;\n", no);
     stmts(5);
     stmt_return();
-    printf("}\n");
+    indent -= 4;
+    output("}\n");
 }
 int main() {
     srand(time(NULL));
