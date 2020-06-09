@@ -1,2 +1,2 @@
-generator: generator.c
-	@gcc -g generator.c -o generator
+build/generator: src/generator.c
+	@gcc -g src/generator.c -o build/generator

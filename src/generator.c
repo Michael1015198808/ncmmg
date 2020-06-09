@@ -65,21 +65,28 @@ void parent_expr() {
 }
 void raw_expr() {
     if((randuint()&7) == 0) {
-        if(randuint()&7) {
-            expr();
-        } else {
-            parent_expr();
-        }
+        parent_expr();
     } else {
         singleton();
     }
-    printf("%c", "+-*"[randuint()%3]);
+    const static char* ops[] = {
+        "+",
+        "-",
+        "*",
+        "==",
+        "!=",
+        "<=",
+        ">=",
+        "<",
+        ">"
+    };
+    if(randuint()&15) {
+        printf("%c", "+-*"[randuint()%3]);
+    } else {
+        printf("%s", ops[randuint()%8]);
+    }
     if((randuint()&7) == 0) {
-        if(randuint()&7) {
-            expr();
-        } else {
-            parent_expr();
-        }
+        parent_expr();
     } else {
         singleton();
     }
@@ -126,7 +133,7 @@ void stmt_if() {
     printf(") {\n");
     indent += 4;
     stmts(2);
-    indent -=4;
+    indent -= 4;
     output("}");
     if(randuint()&1) {
         printf(" else {\n");
@@ -208,6 +215,8 @@ void gen_func() {
     output("a%d5[0] = 17173;\n", no);
     output("a%d5[1] = 4399;\n", no);
     stmts(5);
+    output("write(a%d3);\n", no);
+    output("write(a%d4);\n", no);
     stmt_return();
     indent -= 4;
     output("}\n");
@@ -228,6 +237,10 @@ void gen_main() {
     output("a%d6[0] = 114;\n", no);
     output("a%d6[1] = 514;\n", no);
     stmts(5);
+    output("write(a%d3);\n", no);
+    output("write(a%d4);\n", no);
+    output("write(a%d5[0]);\n", no);
+    output("write(a%d5[1]);\n", no);
     stmt_return();
     indent -= 4;
     output("}\n");
