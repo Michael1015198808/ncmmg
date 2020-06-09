@@ -5,8 +5,8 @@
 #include <assert.h>
 
 int no = 0, indent = 0, is_main = 0;
-void expr();
-void stmt();
+void expr(void);
+void stmt(void);
 void stmts(int);
 
 unsigned int randuint(){
@@ -131,7 +131,7 @@ void stmt_if() {
     if(randuint()&1) {
         printf(" else {\n");
         indent += 4;
-        stmt(2);
+        stmts(2);
         indent -= 4;
         output("}");
     }
@@ -168,16 +168,17 @@ void stmt() {
                 return;
         case 3:
                 if(no == 0 || rand()&15) {
-                    printf("%d", rand()&15);
+                    output("%d;\n", rand()&15);
                 } else {
-                    printf("f%d(", rand()%no);
+                    output("f%d(", rand()%no);
                     expr();
                     printf(", ");
                     expr();
                     printf(", ");
                     printf("a%d%d", no, 5 + (rand()&1));
-                    printf(")");
+                    printf(");");
                 }
+                return;
         case 14:
                 if((randuint()&3) == 0) {
                     stmt_return();
