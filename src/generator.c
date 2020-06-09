@@ -160,6 +160,17 @@ void stmt_while() {
         stmt();
     }
 }
+void stmt_func() {
+    output("");
+    ra();
+    printf(" = f%d(", rand()%no);
+    expr();
+    printf(", ");
+    expr();
+    printf(", ");
+    printf("a%d%d", no, 5 + (rand()&1));
+    printf(");\n");
+}
 void stmt() {
     switch(randuint()&15) {
         case 0:
@@ -174,18 +185,10 @@ void stmt() {
                 stmt_while();
                 return;
         case 3:
-                if(no == 0 || rand()&15) {
-                    output("%d;\n", rand()&15);
-                } else {
-                    output("f%d(", rand()%no);
-                    expr();
-                    printf(", ");
-                    expr();
-                    printf(", ");
-                    printf("a%d%d", no, 5 + (rand()&1));
-                    printf(");");
+                if(no > 0) {
+                    stmt_func();
+                    return;
                 }
-                return;
         case 14:
                 if((randuint()&3) == 0) {
                     stmt_return();
@@ -236,7 +239,9 @@ void gen_main() {
     output("a%d5[1] = 98808;\n", no);
     output("a%d6[0] = 114;\n", no);
     output("a%d6[1] = 514;\n", no);
-    stmts(5);
+    stmts(3);
+    stmt_func();
+    stmts(3);
     output("write(a%d3);\n", no);
     output("write(a%d4);\n", no);
     output("write(a%d5[0]);\n", no);
